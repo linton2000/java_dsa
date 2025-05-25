@@ -12,7 +12,7 @@ public class TwoSum {
         // Calculate complement & perform hashmap lookup
         for (int i = 0; i < nums.length; i++) {
             int complement = target - nums[i];
-            if (map.containsKey(complement)) {
+            if (map.containsKey(complement) && map.get(complement) != i) {  // Avoid returning true for same element
                 return new int[] { map.get(complement), i };
             }
         }
