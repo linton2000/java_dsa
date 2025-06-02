@@ -8,4 +8,9 @@ public class HashEntry {
         this.key = key;
         this.val = val;
     }
+
+    @Override
+    public String toString(){
+        return String.format("(%s, %s)", this.key, this.val);
+    }
 }
