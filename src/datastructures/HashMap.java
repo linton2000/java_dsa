@@ -30,14 +30,19 @@ public class HashMap {
     }
 
     /**
-     * Simple hash entry getter.
+     * Simple hash entry getter. Iterates to required entry in chain for collisions.
      * 
      * @param key - Key for the required entry.
      * @return The required entry.
      */
     public HashEntry get(String key){
         int index = this.hash(key);
-        return array[index];
+
+        if (this.array[index] != null){
+            return collisionGet(index, key, false);
+        } else {
+            return array[index];
+        }
     }
 
     /** 
@@ -79,11 +84,7 @@ public class HashMap {
         int index = this.hash(key);
 
         if (this.array[index] != null){
-            HashEntry entry = this.array[index];
-            while (entry.chainedEntry != null) {
-                entry = entry.chainedEntry;  // Iterate through the collision chain
-            }
-            removedEntry = entry;
+            removedEntry = this.collisionGet(index, key, true);
         } else {
             removedEntry = this.array[index];
         }
@@ -110,7 +111,7 @@ public class HashMap {
     }
 
     /**
-     * Handle collision through chaining hash entries.
+     * Insert during collision by chaining hash entries.
      * 
      * @param index - Where collision happens in backing array.
      * @param newEntry - Entry to be inserted in chain.
@@ -121,6 +122,28 @@ public class HashMap {
             entry = entry.chainedEntry;  // Iterate through the collision chain
         }
         entry.chainedEntry = newEntry;
+    }
+
+    /**
+     * Insert during collision by chaining hash entries.
+     * 
+     * @param index - Where collision happens in backing array.
+     * @param key - Key of entry to be retrieved.
+     * @param isRemoval - Indicates if the retrieved entry needs to be removed
+     */
+    private HashEntry collisionGet(int index, String key, boolean isRemoval){
+        HashEntry entry = this.array[index];
+        while (entry.chainedEntry != null) {
+            HashEntry parent = entry;
+            entry = entry.chainedEntry;
+            if (entry.key == key){
+                if (isRemoval){
+                    parent.chainedEntry = null;
+                }
+                return entry;
+            }
+        }
+        return entry;
     }
 
     /**
