@@ -2,10 +2,13 @@ import java.util.Arrays;
 
 public class App {
     public static void main(String[] args) throws Exception {
-        int[] nums = {3,2,4};
-        int target = 6;
+        int[] nums = {1, 3, 6, 4, 1, 2};
 
-        int[] answer = TwoSum.twoSum(nums, target);
-        System.out.println(Arrays.toString(answer));
+        int answer = SmallestInteger.solution(nums);
+        System.out.println(Integer.toString(answer));
+
+        int[] nums2 = {-10, -1, -4, -6, 1};
+        Arrays.sort(nums2);
+        System.out.println(Arrays.toString(nums2));
     }
 }
