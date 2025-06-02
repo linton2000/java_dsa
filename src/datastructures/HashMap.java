@@ -52,7 +52,7 @@ public class HashMap {
 
         // Check for collisions
         if (this.array[index] != null){
-            this.handleCollision(index, new HashEntry(key, val));
+            this.collisionInsert(index, new HashEntry(key, val));
         } else {
             this.array[index] = new HashEntry(key, val);
         }
@@ -60,12 +60,39 @@ public class HashMap {
 
         // Increase size if more than half of array is filled. Resize before next insertion for efficiency.
         if (this.length > 0.5 * this.capacity){
-            this.resize();
+            this.resize(false);
         }
 
         if (verbosity == 1){
             System.out.printf("Capacity: %d, Length: %d", this.capacity, this.length);
         }
+    }
+
+    /**
+     * Removes & returns the removed entry from HashMap.
+     * 
+     * @param key - Key of entry to be removed.
+     * @return Removed entry.
+     */
+    public HashEntry remove(String key){
+        HashEntry removedEntry;
+        int index = this.hash(key);
+
+        if (this.array[index] != null){
+            HashEntry entry = this.array[index];
+            while (entry.chainedEntry != null) {
+                entry = entry.chainedEntry;  // Iterate through the collision chain
+            }
+            removedEntry = entry;
+        } else {
+            removedEntry = this.array[index];
+        }
+
+        this.length -= 1;
+        if (this.length < 0.25 * this.capacity) { // Downsize if less than 25% of capacity is used.
+            this.resize(true);
+        }
+        return removedEntry;
     }
 
     /**
@@ -88,7 +115,7 @@ public class HashMap {
      * @param index - Where collision happens in backing array.
      * @param newEntry - Entry to be inserted in chain.
      */
-    private void handleCollision(int index, HashEntry newEntry){
+    private void collisionInsert(int index, HashEntry newEntry){
         HashEntry entry = this.array[index];
         while (entry.chainedEntry != null) {
             entry = entry.chainedEntry;  // Iterate through the collision chain
@@ -99,8 +126,12 @@ public class HashMap {
     /**
      * Double capacity & rehash all existing entries. Best called after insertion (before next insert).
      */
-    private void resize(){
-        this.capacity = this.capacity * 2;
+    private void resize(boolean isDownsize){
+        if (isDownsize){
+            this.capacity = this.capacity / 2;
+        } else {
+            this.capacity = this.capacity * 2;
+        }
 
         // Rehashing
         HashEntry[] oldArray = this.array;
@@ -109,7 +140,7 @@ public class HashMap {
             if (entry != null){
                 int index = this.hash(entry.key);
                 if (this.array[index] != null){
-                    this.handleCollision(index, entry);
+                    this.collisionInsert(index, entry);
                 } else {
                     this.array[index] = entry;
                 }
