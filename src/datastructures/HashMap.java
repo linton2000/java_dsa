@@ -4,21 +4,31 @@ public class HashMap {
     HashEntry[] array;
     int length;  // No. of elements in HashMap
     int capacity;  // Size of backing array
+    int verbosity; // 0 - No prints; 1 - All prints
 
-    public HashMap(){
+    public HashMap(int verbosity){
         this.length = 0;
         this.capacity = 2;  // Arbitrary initial capacity
         this.array = new HashEntry[this.capacity];
+        this.verbosity = verbosity;
+    }
+
+    public HashMap(){
+        this(0);
     }
 
     public void insert(String key, String val){
         int index = this.hash(key);
-        array[index] = new HashEntry(key, val);
+        this.array[index] = new HashEntry(key, val);
         this.length += 1;
 
         // Increase size if more than half of array is filled. Resize before next insertion for efficiency.
         if (this.length > 0.5 * this.capacity){
             this.resize();
+        }
+
+        if (verbosity == 1){
+            System.out.printf("Capacity: %d, Length: %d", this.capacity, this.length);
         }
     }
 
@@ -49,7 +59,8 @@ public class HashMap {
         this.array = new HashEntry[this.capacity];
         for (HashEntry entry : oldArray){
             if (entry != null){
-                this.insert(entry.key, entry.val);
+                int index = this.hash(entry.key);
+                this.array[index] = entry;
             }
         }
     }
