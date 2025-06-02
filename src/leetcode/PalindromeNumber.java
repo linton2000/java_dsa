@@ -1,5 +1,5 @@
-package leetcode;
 // https://leetcode.com/problems/palindrome-number/
+package leetcode;
 
 public class PalindromeNumber {
     public boolean isPalindrome(int x) {
