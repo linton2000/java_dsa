@@ -12,13 +12,14 @@ public class HashMap {
     }
 
     public void insert(String key, String val){
-        if (this.length > 0.5 * this.capacity){  // Increase size if more than half of array is filled.
-            this.resize();
-        }
-
         int index = this.hash(key);
         array[index] = new HashEntry(key, val);
         this.length += 1;
+
+        // Increase size if more than half of array is filled. Resize before next insertion for efficiency.
+        if (this.length > 0.5 * this.capacity){
+            this.resize();
+        }
     }
 
     public HashEntry get(String key){
@@ -41,7 +42,16 @@ public class HashMap {
     }
 
     private void resize(){
-        System.out.println("resize() called!");
+        this.capacity = this.capacity * 2;
+
+        // Rehashing
+        HashEntry[] oldArray = this.array;
+        this.array = new HashEntry[this.capacity];
+        for (HashEntry entry : oldArray){
+            if (entry != null){
+                this.insert(entry.key, entry.val);
+            }
+        }
     }
 
 }
