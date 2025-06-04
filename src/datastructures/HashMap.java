@@ -38,11 +38,7 @@ public class HashMap {
     public HashEntry get(String key){
         int index = this.hash(key);
 
-        if (this.array[index] != null){
-            return collisionGet(index, key, false);
-        } else {
-            return array[index];
-        }
+        return chainGet(index, key, false);
     }
 
     /** 
@@ -57,7 +53,7 @@ public class HashMap {
 
         // Check for collisions
         if (this.array[index] != null){
-            this.collisionInsert(index, new HashEntry(key, val));
+            this.chainInsert(index, new HashEntry(key, val));
         } else {
             this.array[index] = new HashEntry(key, val);
         }
@@ -84,9 +80,14 @@ public class HashMap {
         int index = this.hash(key);
 
         if (this.array[index] != null){
-            removedEntry = this.collisionGet(index, key, true);
+            if (this.array[index].chainedEntry != null) {
+                removedEntry = this.chainGet(index, key, true);
+            } else {
+                removedEntry = this.array[index];
+                this.array[index] = null;
+            }
         } else {
-            removedEntry = this.array[index];
+            return null;  // No entry to remove
         }
 
         this.length -= 1;
@@ -111,12 +112,12 @@ public class HashMap {
     }
 
     /**
-     * Insert during collision by chaining hash entries.
+     * Insert element while handling collision by chaining hash entries.
      * 
      * @param index - Where collision happens in backing array.
      * @param newEntry - Entry to be inserted in chain.
      */
-    private void collisionInsert(int index, HashEntry newEntry){
+    private void chainInsert(int index, HashEntry newEntry){
         HashEntry entry = this.array[index];
         while (entry.chainedEntry != null) {
             entry = entry.chainedEntry;  // Iterate through the collision chain
@@ -125,13 +126,13 @@ public class HashMap {
     }
 
     /**
-     * Insert during collision by chaining hash entries.
+     * Retrieve element from backing array accounting for collision chain.
      * 
      * @param index - Where collision happens in backing array.
      * @param key - Key of entry to be retrieved.
      * @param isRemoval - Indicates if the retrieved entry needs to be removed
      */
-    private HashEntry collisionGet(int index, String key, boolean isRemoval){
+    private HashEntry chainGet(int index, String key, boolean isRemoval){
         HashEntry entry = this.array[index];
         while (entry.chainedEntry != null) {
             HashEntry parent = entry;
@@ -143,7 +144,10 @@ public class HashMap {
                 return entry;
             }
         }
-        return entry;
+        if (entry.key == key) {
+            return entry;
+        }
+        return null;  // Non-existent entry
     }
 
     /**
@@ -163,7 +167,7 @@ public class HashMap {
             if (entry != null){
                 int index = this.hash(entry.key);
                 if (this.array[index] != null){
-                    this.collisionInsert(index, entry);
+                    this.chainInsert(index, entry);
                 } else {
                     this.array[index] = entry;
                 }
